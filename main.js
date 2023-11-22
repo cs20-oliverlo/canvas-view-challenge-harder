@@ -36,8 +36,8 @@ function keyupHandler(event) {
 
 // Reset Variables
 let walls;
-let triggers;
 let player;
+let camera;
 
 reset();
 
@@ -48,18 +48,18 @@ function animate() {
     // Fill Background
     ctx.clearRect(0, 0, cnv.width, cnv. height);
 
-    // Food Helper Functions
+    // Player Helper Functions
+    draw(player, 0);
+    playerMovement();
+
+    // Wall Helper Functions
     for (let i = 0; i < walls.length; i++) {
         draw(walls, i);
         checkCollision(i);
     }
 
-    // Player Helper Functions
-    draw(player, 0);
-    playerMovement();
-
-    // Camera Movement Triggers
-    checkTriggers();
+    // Camera Movement
+    moveCamera();
     
     // Request Animation Frame
     requestAnimationFrame(animate);
@@ -67,7 +67,7 @@ function animate() {
 
 function draw(shape, n) {
     ctx.fillStyle = `${shape[n].color}`;
-    ctx.fillRect(shape[n].x, shape[n].y, shape[n].w, shape[n].h);
+    ctx.fillRect(shape[n].x - camera.x, shape[n].y - camera.y, shape[n].w, shape[n].h);
 }
 
 function playerMovement() {
@@ -96,89 +96,33 @@ function playercontrols() {
 
 function checkCollision(n) {
     // Wall Detection
-    if (player[0].y + player[0].h > walls[n].y && player[0].y + player[0].h < walls[n].y + walls[n].h && player[0].x + player[0].xV + 1 < walls[n].x + walls[n].w && player[0].x + player[0].w - player[0].xV - 1 > walls[n].x) {
+    if (player[0].y + player[0].h > walls[n].y && player[0].y + player[0].h < walls[n].y + walls[n].h && player[0].x + player[0].xV < walls[n].x + walls[n].w && player[0].x + player[0].w - player[0].xV > walls[n].x) {
         player[0].y = walls[n].y - player[0].h;
         player[0].yV = 0;
-    } else if (player[0].y < walls[n].y + walls[n].h && player[0].y > walls[n].y && player[0].x + player[0].xV + 1 < walls[n].x + walls[n].w&& player[0].x + player[0].w - player[0].xV - 1 > walls[n].x) {
+    } else if (player[0].y < walls[n].y + walls[n].h && player[0].y > walls[n].y && player[0].x + player[0].xV < walls[n].x + walls[n].w && player[0].x + player[0].w - player[0].xV > walls[n].x) {
         player[0].y = walls[n].y + walls[n].h;
         player[0].yV = 0;
     } else if (player[0].x < walls[n].x + walls[n].w && player[0].x > walls[n].x && player[0].y < walls[n].y + walls[n].h && player[0].y + player[0].h > walls[n].y) {
         player[0].x = walls[n].x + walls[n].w;
-    } else if (player[0].x + player[0].w > walls[n].x && player[0].x + player[0].w < walls[n].x + walls[n].w &&player[0].y < walls[n].y + walls[n].h && player[0].y + player[0].h > walls[n].y) {
+    } else if (player[0].x + player[0].w > walls[n].x && player[0].x + player[0].w < walls[n].x + walls[n].w && player[0].y < walls[n].y + walls[n].h && player[0].y + player[0].h > walls[n].y) {
         player[0].x = walls[n].x - player[0].w;
-    }
-
-    // Canvas Borders
-    if (player[0].x < 0) {
-        player[0].x = 0;
-    }
-    if (player[0].x + player[0].w > cnv.width) {
-        player[0].x = cnv.width - player[0].w;
     }
 }
 
-function checkTriggers() {
-    for (let i = 0; i < triggers.length; i++) {
-        // Trigger Detection
-        // Horizontal Triggers
-        if (triggers[i].id === "horizontal" && player[0].x + player[0].w / 2 > triggers[i].x) {
-            triggers[i].state = true;
-        } else {
-            triggers[i].state = false;
-        }
+function moveCamera() {
+    camera.x = (player[0].x + player[0].w / 2) - cnv.width / 2
+    camera.y = (player[0].y + player[0].h / 2) - cnv.height / 2
 
-        // Vertical Triggers
-        if (triggers[i].id === "vertical" && player[0].y + player[0].h / 2 > triggers[i].y) {
-            triggers[i].state = true;
-        } else {
-            triggers[i].state = false;
-        }
+    if (camera.x < walls[0].x) {
+        camera.x = walls[0].x;
+    } else if (camera.x > walls[1].x + walls[1].w - cnv.width) {
+        camera.x = walls[1].x + walls[1].w - cnv.width;
     }
 
-    // Horizontal Camera Movement
-    if (triggers[1].state === true) {
-        // Stops the "camera" from moving past the end of the platform
-    } else if (triggers[0].state === true) {
-        if (player[0].x + player[0].w / 2 > cnv.width / 2) {
-            for (let i = 0; i < walls.length; i++) {
-                walls[i].x += (cnv.width / 2) - (player[0].x + player[0].w / 2);
-            }
-            for (let i = 0; i < triggers.length; i++) {
-                triggers[i].x += (cnv.width / 2) - (player[0].x + player[0].w / 2);
-            }
-            player[0].x += (cnv.width / 2) - (player[0].x + player[0].w / 2);
-        }
-        if (player[0].x + player[0].w / 2 < cnv.width / 2) {
-            for (let i = 0; i < walls.length; i++) {
-                walls[i].x += (cnv.width / 2) - (player[0].x + player[0].w / 2);
-            }
-            for (let i = 0; i < triggers.length; i++) {
-                triggers[i].x += (cnv.width / 2) - (player[0].x + player[0].w / 2);
-            }
-            player[0].x += (cnv.width / 2) - (player[0].x + player[0].w / 2);
-        }
-    }
-
-    // Vertical Camera Movement
-    if (triggers[2] === true) {
-        if (player[0].y + player[0].h / 2 > cnv.height / 2) {
-            for (let i = 0; i < walls.length; i++) {
-                walls[i].y += (cnv.height / 2) - (player[0].y + player[0].h / 2);
-            }
-            for (let i = 0; i < triggers.length; i++) {
-                triggers[i].y += (cnv.height / 2) - (player[0].y + player[0].h / 2);
-            }
-            player[0].y += (cnv.height / 2) - (player[0].y + player[0].h / 2);
-        }
-        if (player[0].y + player[0].w / 2 < cnv.height / 2) {
-            for (let i = 0; i < walls.length; i++) {
-                walls[i].y += (cnv.height / 2) - (player[0].y + player[0].h / 2);
-            }
-            for (let i = 0; i < triggers.length; i++) {
-                triggers[i].y += (cnv.height / 2) - (player[0].y + player[0].h / 2);
-            }
-            player[0].y += (cnv.height / 2) - (player[0].y + player[0].h / 2);
-        }
+    if (camera.y < walls[2].y + walls[2].h / 2) {
+        camera.y = walls[2].y + walls[2].h / 2;
+    } else if (camera.y > walls[3].y + walls[3].h / 2 - cnv.height) {
+        camera.y = walls[3].y + walls[3].h / 2 - cnv.height;
     }
 }
 
@@ -208,43 +152,35 @@ function newWall(x1, y1, w1, h1, color1) {
     }
 }
 
-function newTrigger(x1, y1, id1, state1) {
-    return {
-        x: x1,
-        y: y1,
-        id: id1,
-        state: state1
-    }
-}
-
 function reset() {
     walls = [];
-    walls.push(newWall(0, 0, 200, cnv.height, "grey"));
-    walls.push(newWall(1850, 0, 300, cnv.height, "grey"));
-    walls.push(newWall(0, cnv.height - 50, 2100, 50, "grey"));
-    walls.push(newWall(1000, cnv.height - 75, 50, 50, "grey"));
+    walls.push(newWall(0, 0, 200, 1100, "grey"));
+    walls.push(newWall(1850, 0, 200, 1100, "grey"));
+    walls.push(newWall(0, 0, 2150, 200, "grey"));
+    walls.push(newWall(0, 1100, 2150, 200, "grey"));
 
-    let n = 520;
+    let vert = (walls[3].y - (walls[2].y + walls[2].h));
+    let hori = walls[0].w + 320;
     for (let i = 0; i < 5; i++) {
         if (i % 2 === 0) {
-            walls.push(newWall(n, cnv.height / 2, 150, 20, "grey"));
-            walls.push(newWall(n, cnv.height / 2 - 200, 150, 20, "grey"));
-            walls.push(newWall(n, cnv.height / 2 - 400, 150, 20, "grey"));
-            walls.push(newWall(n, cnv.height / 2 - 600, 150, 20, "grey"));
+            walls.push(newWall(hori, vert, 150, 20, "grey"));
+            walls.push(newWall(hori, vert - 200, 150, 20, "grey"));
+            walls.push(newWall(hori, vert - 400, 150, 20, "grey"));
+            walls.push(newWall(hori, vert - 600, 150, 20, "grey"));
         } else {
-            walls.push(newWall(n, (cnv.height / 2) + 100, 150, 20, "grey"));
-            walls.push(newWall(n, (cnv.height / 2) - 200 + 100, 150, 20, "grey"));
-            walls.push(newWall(n, (cnv.height / 2) - 400 + 100, 150, 20, "grey"));
-            walls.push(newWall(n, (cnv.height / 2) - 600 + 100, 150, 20, "grey"));
+            walls.push(newWall(hori, vert + 100, 150, 20, "grey"));
+            walls.push(newWall(hori, vert - 200 + 100, 150, 20, "grey"));
+            walls.push(newWall(hori, vert - 400 + 100, 150, 20, "grey"));
+            walls.push(newWall(hori, vert - 600 + 100, 150, 20, "grey"));
         }
-        n += 205;
+        hori += 205;
     }
 
-    triggers = [];
-    triggers.push(newTrigger(cnv.width / 2, 0, "horizontal", false));
-    triggers.push(newTrigger(2060 - cnv.width / 2, 0, "horizontal", false));
-    triggers.push(newTrigger(0, cnv.height / 2, "vertical", false));
-
     player = [];
-    player.push(newPlayer(cnv.width / 2, cnv.height / 2, 20, 20, "blue", false, false, false, 5, 0, 1));
+    player.push(newPlayer(walls[0].x + walls[0].w * 1.5, vert, 20, 20, "blue", false, false, false, 5, 0, 1));
+
+    camera = {
+        x: 500,
+        y: 500
+    };
 }
