@@ -104,18 +104,21 @@ function playercontrols() {
 function checkCollision() {
     for (let i = 0; i < walls.length; i++) {
         // Wall Detection
-        // Detects Players: bottom, top, left, and right in that order
+        // Bottom (of player)
         if (player.y + player.h > walls[i].y && player.y + player.h < walls[i].y + walls[i].h && player.x + player.xV < walls[i].x + walls[i].w && player.x + player.w - player.xV > walls[i].x) {
             player.y = walls[i].y - player.h;
             player.yV = 0;
         }
+        // Top (of player)
         if (player.y < walls[i].y + walls[i].h && player.y > walls[i].y && player.x + player.xV < walls[i].x + walls[i].w && player.x + player.w - player.xV > walls[i].x) {
             player.y = walls[i].y + walls[i].h;
             player.yV = 0;
         }
+        // Left (of player)
         if (player.x < walls[i].x + walls[i].w && player.x > walls[i].x && player.y < walls[i].y + walls[i].h && player.y + player.h > walls[i].y) {
             player.x = walls[i].x + walls[i].w;
         }
+        // Right (of player)
         if (player.x + player.w > walls[i].x && player.x + player.w < walls[i].x + walls[i].w && player.y < walls[i].y + walls[i].h && player.y + player.h > walls[i].y) {
             player.x = walls[i].x - player.w;
         }
