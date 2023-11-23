@@ -45,7 +45,7 @@ requestAnimationFrame(animate);
 
 function animate() {
     // Fill Background
-    ctx.clearRect(0, 0, cnv.width, cnv. height);
+    ctx.clearRect(0, 0, cnv.width, cnv.height);
 
     // Wall Helper Functions
     for (let i = 0; i < walls.length; i++) {
@@ -53,12 +53,12 @@ function animate() {
     }
 
     // Player Helper Functions
-    draw(player, 0);
+    draw(player);
     playerMovement();
     checkCollision();
 
     // Camera Movement
-    moveCamera();
+    cameraMovement();
     
     // Request Animation Frame
     requestAnimationFrame(animate);
@@ -81,7 +81,7 @@ function playerMovement() {
     player.yV += player.yAccel;
     player.y += player.yV;
 
-    // Max Y Velocity
+    // Max Y velocity
     if (player.yV > 10) {
         player.yV = 10;
     } else if (player.yV < -10) {
@@ -104,14 +104,14 @@ function playercontrols() {
 function checkCollision() {
     for (let i = 0; i < walls.length; i++) {
         // Wall Detection
-        // Bottom (of player)
-        if (player.y + player.h > walls[i].y && player.y + player.h < walls[i].y + walls[i].h && player.x + player.xV < walls[i].x + walls[i].w && player.x + player.w - player.xV > walls[i].x) {
-            player.y = walls[i].y - player.h;
-            player.yV = 0;
-        }
         // Top (of player)
         if (player.y < walls[i].y + walls[i].h && player.y > walls[i].y && player.x + player.xV < walls[i].x + walls[i].w && player.x + player.w - player.xV > walls[i].x) {
             player.y = walls[i].y + walls[i].h;
+            player.yV = 0;
+        }
+        // Bottom (of player)
+        if (player.y + player.h > walls[i].y && player.y + player.h < walls[i].y + walls[i].h && player.x + player.xV < walls[i].x + walls[i].w && player.x + player.w - player.xV > walls[i].x) {
+            player.y = walls[i].y - player.h;
             player.yV = 0;
         }
         // Left (of player)
@@ -125,23 +125,23 @@ function checkCollision() {
     }
 }
 
-function moveCamera() {
+function cameraMovement() {
     // Update Camera Position
-    camera.x = (player.x + player.w / 2) - cnv.width / 2
-    camera.y = (player.y + player.h / 2) - cnv.height / 2
+    camera.x = (player.x + player.w / 2) - camera.w / 2
+    camera.y = (player.y + player.h / 2) - camera.h / 2
 
     // Contrain Cameras X value
     if (camera.x < walls[0].x) {
         camera.x = walls[0].x;
-    } else if (camera.x > walls[1].x + walls[1].w - cnv.width) {
-        camera.x = walls[1].x + walls[1].w - cnv.width;
+    } else if (camera.x + camera.w > walls[1].x + walls[1].w) {
+        camera.x = walls[1].x + walls[1].w - camera.w;
     }
 
     // Constrain Cameras Y value
     if (camera.y < walls[2].y + walls[2].h / 2) {
         camera.y = walls[2].y + walls[2].h / 2;
-    } else if (camera.y > walls[3].y + walls[3].h / 2 - cnv.height) {
-        camera.y = walls[3].y + walls[3].h / 2 - cnv.height;
+    } else if (camera.y + camera.h > walls[3].y + walls[3].h / 2) {
+        camera.y = walls[3].y + walls[3].h / 2 - camera.h;
     }
 }
 
@@ -197,6 +197,8 @@ function reset() {
 
     camera = {
         x: 0,
-        y: 0
+        y: 0,
+        w: cnv.width,
+        h: cnv.height
     };
 }
