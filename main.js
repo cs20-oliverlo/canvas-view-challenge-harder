@@ -10,29 +10,27 @@ document.addEventListener("keyup", keyupHandler);
 
 function keydownHandler(event) {
     if (event.code === "ArrowUp") {
-        player[0].up = true;
+        player.up = true;
     }
     if (event.code === "ArrowLeft") {
-        player[0].left = true;
+        player.left = true;
     }
     if (event.code === "ArrowRight") {
-        player[0].right = true;
+        player.right = true;
     }
 }
 
 function keyupHandler(event) {
     if (event.code === "ArrowUp") {
-        player[0].up = false;
+        player.up = false;
     }
     if (event.code === "ArrowLeft") {
-        player[0].left = false;
+        player.left = false;
     }
     if (event.code === "ArrowRight") {
-        player[0].right = false;
+        player.right = false;
     }
 }
-
-// Global Variables
 
 // Reset Variables
 let walls;
@@ -44,19 +42,20 @@ reset();
 
 // Animation
 requestAnimationFrame(animate);
+
 function animate() {
     // Fill Background
     ctx.clearRect(0, 0, cnv.width, cnv. height);
 
-    // Player Helper Functions
-    draw(player, 0);
-    playerMovement();
-
     // Wall Helper Functions
     for (let i = 0; i < walls.length; i++) {
         draw(walls, i);
-        checkCollision(i);
     }
+
+    // Player Helper Functions
+    draw(player, 0);
+    playerMovement();
+    checkCollision();
 
     // Camera Movement
     moveCamera();
@@ -66,80 +65,81 @@ function animate() {
 }
 
 function draw(shape, n) {
-    ctx.fillStyle = `${shape[n].color}`;
-    ctx.fillRect(shape[n].x - camera.x, shape[n].y - camera.y, shape[n].w, shape[n].h);
+    if (shape === walls) {
+        ctx.fillStyle = `${shape[n].color}`;
+        ctx.fillRect(shape[n].x - camera.x, shape[n].y - camera.y, shape[n].w, shape[n].h);
+    } else {
+        ctx.fillStyle = `${shape.color}`;
+        ctx.fillRect(shape.x - camera.x, shape.y - camera.y, shape.w, shape.h);
+    }
 }
 
 function playerMovement() {
-   playercontrols();
-   player[0].yV += player[0].yAccel;
-   player[0].y += player[0].yV;
+    playercontrols();
 
-    if (player[0].yV > 10) {
-        player[0].yV = 10;
-    } else if (player[0].yV < -10) {
-        player[0].yV = -10;
+    // Moves Player
+    player.yV += player.yAccel;
+    player.y += player.yV;
+
+    // Max Y Velocity
+    if (player.yV > 10) {
+        player.yV = 10;
+    } else if (player.yV < -10) {
+        player.yV = -10;
     }
 }
 
 function playercontrols() {
-    if (player[0].up === true) {
-        player[0].yV = -10;
+    if (player.up === true) {
+        player.yV = -10;
     }
-    if (player[0].left === true) {
-        player[0].x -= player[0].xV;
+    if (player.left === true) {
+        player.x -= player.xV;
     }
-    if (player[0].right === true) {
-        player[0].x += player[0].xV;
+    if (player.right === true) {
+        player.x += player.xV;
     }
 }
 
-function checkCollision(n) {
-    // Wall Detection
-    if (player[0].y + player[0].h > walls[n].y && player[0].y + player[0].h < walls[n].y + walls[n].h && player[0].x + player[0].xV < walls[n].x + walls[n].w && player[0].x + player[0].w - player[0].xV > walls[n].x) {
-        player[0].y = walls[n].y - player[0].h;
-        player[0].yV = 0;
-    } else if (player[0].y < walls[n].y + walls[n].h && player[0].y > walls[n].y && player[0].x + player[0].xV < walls[n].x + walls[n].w && player[0].x + player[0].w - player[0].xV > walls[n].x) {
-        player[0].y = walls[n].y + walls[n].h;
-        player[0].yV = 0;
-    } else if (player[0].x < walls[n].x + walls[n].w && player[0].x > walls[n].x && player[0].y < walls[n].y + walls[n].h && player[0].y + player[0].h > walls[n].y) {
-        player[0].x = walls[n].x + walls[n].w;
-    } else if (player[0].x + player[0].w > walls[n].x && player[0].x + player[0].w < walls[n].x + walls[n].w && player[0].y < walls[n].y + walls[n].h && player[0].y + player[0].h > walls[n].y) {
-        player[0].x = walls[n].x - player[0].w;
+function checkCollision() {
+    for (let i = 0; i < walls.length; i++) {
+        // Wall Detection
+        // Detects Players: bottom, top, left, and right in that order
+        if (player.y + player.h > walls[i].y && player.y + player.h < walls[i].y + walls[i].h && player.x + player.xV < walls[i].x + walls[i].w && player.x + player.w - player.xV > walls[i].x) {
+            player.y = walls[i].y - player.h;
+            player.yV = 0;
+        }
+        if (player.y < walls[i].y + walls[i].h && player.y > walls[i].y && player.x + player.xV < walls[i].x + walls[i].w && player.x + player.w - player.xV > walls[i].x) {
+            player.y = walls[i].y + walls[i].h;
+            player.yV = 0;
+        }
+        if (player.x < walls[i].x + walls[i].w && player.x > walls[i].x && player.y < walls[i].y + walls[i].h && player.y + player.h > walls[i].y) {
+            player.x = walls[i].x + walls[i].w;
+        }
+        if (player.x + player.w > walls[i].x && player.x + player.w < walls[i].x + walls[i].w && player.y < walls[i].y + walls[i].h && player.y + player.h > walls[i].y) {
+            player.x = walls[i].x - player.w;
+        }
     }
 }
 
 function moveCamera() {
-    camera.x = (player[0].x + player[0].w / 2) - cnv.width / 2
-    camera.y = (player[0].y + player[0].h / 2) - cnv.height / 2
+    // Update Camera Position
+    camera.x = (player.x + player.w / 2) - cnv.width / 2
+    camera.y = (player.y + player.h / 2) - cnv.height / 2
 
+    // Contrain Cameras X value
     if (camera.x < walls[0].x) {
         camera.x = walls[0].x;
     } else if (camera.x > walls[1].x + walls[1].w - cnv.width) {
         camera.x = walls[1].x + walls[1].w - cnv.width;
     }
 
+    // Constrain Cameras Y value
     if (camera.y < walls[2].y + walls[2].h / 2) {
         camera.y = walls[2].y + walls[2].h / 2;
     } else if (camera.y > walls[3].y + walls[3].h / 2 - cnv.height) {
         camera.y = walls[3].y + walls[3].h / 2 - cnv.height;
     }
-}
-
-function newPlayer(x1, y1, w1, h1, color1, up1, left1, right1, xV1, yV1, yAccel1) {
-    return {
-            x: x1,
-            y: y1,
-            w: w1,
-            h: h1,
-            color: color1,
-            up: up1,
-            left: left1,
-            right: right1,
-            xV: xV1,
-            yV: yV1,
-            yAccel: yAccel1
-    } 
 }
 
 function newWall(x1, y1, w1, h1, color1) {
@@ -154,11 +154,13 @@ function newWall(x1, y1, w1, h1, color1) {
 
 function reset() {
     walls = [];
+    // Border Walls
     walls.push(newWall(0, 0, 200, 1100, "grey"));
     walls.push(newWall(1850, 0, 200, 1100, "grey"));
     walls.push(newWall(0, 0, 2150, 200, "grey"));
     walls.push(newWall(0, 1100, 2150, 200, "grey"));
 
+    // Platforms
     let vert = (walls[3].y - (walls[2].y + walls[2].h));
     let hori = walls[0].w + 320;
     for (let i = 0; i < 5; i++) {
@@ -176,11 +178,22 @@ function reset() {
         hori += 205;
     }
 
-    player = [];
-    player.push(newPlayer(walls[0].x + walls[0].w * 1.5, vert, 20, 20, "blue", false, false, false, 5, 0, 1));
+    player = {
+        x: walls[0].x + walls[0].w * 1.5,
+        y: vert,
+        w: 20,
+        h: 20,
+        color: "blue",
+        up: false,
+        left: false,
+        right: false,
+        xV: 5,
+        yV: 0,
+        yAccel: 1
+    };
 
     camera = {
-        x: 500,
-        y: 500
+        x: 0,
+        y: 0
     };
 }
